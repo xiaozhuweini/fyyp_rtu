@@ -108,10 +108,9 @@ typedef struct
 /** @defgroup HCD_Speed HCD Speed
   * @{
   */
-#define HCD_SPEED_HIGH               USBH_HS_SPEED
-#define HCD_SPEED_FULL               USBH_FS_SPEED
-#define HCD_SPEED_LOW                USBH_LS_SPEED
-
+#define HCD_SPEED_HIGH               0U
+#define HCD_SPEED_LOW                2U
+#define HCD_SPEED_FULL               3U
 /**
   * @}
   */

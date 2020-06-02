@@ -122,7 +122,6 @@ static HAL_StatusTypeDef PCD_EP_OutSetupPacket_int(PCD_HandleTypeDef *hpcd, uint
   */
 HAL_StatusTypeDef HAL_PCD_Init(PCD_HandleTypeDef *hpcd)
 {
-  USB_OTG_GlobalTypeDef *USBx;
   uint8_t i;
 
   /* Check the PCD handle allocation */
@@ -133,8 +132,6 @@ HAL_StatusTypeDef HAL_PCD_Init(PCD_HandleTypeDef *hpcd)
 
   /* Check the parameters */
   assert_param(IS_PCD_ALL_INSTANCE(hpcd->Instance));
-
-  USBx = hpcd->Instance;
 
   if (hpcd->State == HAL_PCD_STATE_RESET)
   {
@@ -170,12 +167,6 @@ HAL_StatusTypeDef HAL_PCD_Init(PCD_HandleTypeDef *hpcd)
   }
 
   hpcd->State = HAL_PCD_STATE_BUSY;
-
-  /* Disable DMA mode for FS instance */
-  if ((USBx->CID & (0x1U << 8)) == 0U)
-  {
-    hpcd->Init.dma_enable = 0U;
-  }
 
   /* Disable the Interrupts */
   __HAL_PCD_DISABLE(hpcd);
@@ -1039,7 +1030,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
 {
   USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
   uint32_t USBx_BASE = (uint32_t)USBx;
-  uint32_t i, ep_intr, epint, epnum;
+  uint32_t i, ep_intr, epint, epnum = 0U;
   uint32_t fifoemptymsk, temp;
   USB_OTG_EPTypeDef *ep;
 
@@ -1297,7 +1288,15 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
     if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_ENUMDNE))
     {
       (void)USB_ActivateSetup(hpcd->Instance);
-      hpcd->Init.speed = USB_GetDevSpeed(hpcd->Instance);
+
+      if (USB_GetDevSpeed(hpcd->Instance) == USB_OTG_SPEED_HIGH)
+      {
+        hpcd->Init.speed = USB_OTG_SPEED_HIGH;
+      }
+      else
+      {
+        hpcd->Init.speed = USB_OTG_SPEED_FULL;
+      }
 
       /* Set USB Turnaround time */
       (void)USB_SetTurnaroundTime(hpcd->Instance,
@@ -1360,10 +1359,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
     /* Handle Incomplete ISO IN Interrupt */
     if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_IISOIXFR))
     {
-      /* Keep application checking the corresponding Iso IN endpoint
-      causing the incomplete Interrupt */
-      epnum = 0U;
-
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
       hpcd->ISOINIncompleteCallback(hpcd, (uint8_t)epnum);
 #else
@@ -1376,10 +1371,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
     /* Handle Incomplete ISO OUT Interrupt */
     if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_PXFR_INCOMPISOOUT))
     {
-      /* Keep application checking the corresponding Iso OUT endpoint
-      causing the incomplete Interrupt */
-      epnum = 0U;
-
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
       hpcd->ISOOUTIncompleteCallback(hpcd, (uint8_t)epnum);
 #else
