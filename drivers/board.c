@@ -74,7 +74,7 @@ static int _board_init_gpio(void)
 	HAL_GPIO_Init(GPIOC, &gpio_init);
 	HAL_GPIO_Init(GPIOD, &gpio_init);
 	HAL_GPIO_Init(GPIOE, &gpio_init);
-	gpio_init.Pin -= (GPIO_PIN_13 + GPIO_PIN_14);
+//	gpio_init.Pin -= (GPIO_PIN_13 + GPIO_PIN_14);
 	HAL_GPIO_Init(GPIOA, &gpio_init);
 
 	__HAL_RCC_GPIOA_CLK_DISABLE();
