@@ -2355,6 +2355,9 @@
     <file>
       <name>$PROJ_DIR$\drivers\drv_tevent.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\drivers\drv_w25qxxx.c</name>
+    </file>
   </group>
   <group>
     <name>hal_drivers</name>
