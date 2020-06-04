@@ -16,7 +16,7 @@
 
 
 //软件版本
-#define PTCL_SOFTWARE_EDITION			"smt-e100_0"
+#define PTCL_SOFTWARE_EDITION			"fyyp_rtu_0"
 
 //基地址
 #define PTCL_BASE_ADDR_PARAM			1200							//参数基地址

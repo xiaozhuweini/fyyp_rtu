@@ -21,7 +21,7 @@
 #include "string.h"
 #include "drv_ads.h"
 #include "drv_bluetooth.h"
-#include "hj212.h"
+//#include "hj212.h"
 
 
 
@@ -400,33 +400,33 @@ static void _ptcl_param_info_handler(PTCL_PARAM_INFO **param_info_ptr_ptr, rt_ui
 			case PTCL_PARAM_INFO_AD_CAL_VAL:
 				ads_set_cal_val(ptr->data_len, *(rt_int32_t *)(ptr->pdata));
 				break;
-			case PTCL_PARAM_INFO_HJ212_ST:
-				hj212_set_st(ptr->pdata);
-				break;
-			case PTCL_PARAM_INFO_HJ212_PW:
-				hj212_set_pw(ptr->pdata);
-				break;
-			case PTCL_PARAM_INFO_HJ212_MN:
-				hj212_set_mn(ptr->pdata);
-				break;
-			case PTCL_PARAM_INFO_HJ212_RTD_EN:
-				hj212_set_rtd_en(*ptr->pdata);
-				break;
-			case PTCL_PARAM_INFO_HJ212_RECOUNT:
-				hj212_set_recount(*ptr->pdata);
-				break;
-			case PTCL_PARAM_INFO_HJ212_MIN_INTERVAL:
-				hj212_set_min_interval(*(rt_uint16_t *)(ptr->pdata));
-				break;
-			case PTCL_PARAM_INFO_HJ212_RTD_INTERVAL:
-				hj212_set_rtd_interval(*(rt_uint16_t *)(ptr->pdata));
-				break;
-			case PTCL_PARAM_INFO_HJ212_OVER_TIME:
-				hj212_set_over_time(*(rt_uint16_t *)(ptr->pdata));
-				break;
-			case PTCL_PARAM_INFO_HJ212_RS_EN:
-				hj212_set_rs_en(*ptr->pdata);
-				break;
+//			case PTCL_PARAM_INFO_HJ212_ST:
+//				hj212_set_st(ptr->pdata);
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_PW:
+//				hj212_set_pw(ptr->pdata);
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_MN:
+//				hj212_set_mn(ptr->pdata);
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_RTD_EN:
+//				hj212_set_rtd_en(*ptr->pdata);
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_RECOUNT:
+//				hj212_set_recount(*ptr->pdata);
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_MIN_INTERVAL:
+//				hj212_set_min_interval(*(rt_uint16_t *)(ptr->pdata));
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_RTD_INTERVAL:
+//				hj212_set_rtd_interval(*(rt_uint16_t *)(ptr->pdata));
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_OVER_TIME:
+//				hj212_set_over_time(*(rt_uint16_t *)(ptr->pdata));
+//				break;
+//			case PTCL_PARAM_INFO_HJ212_RS_EN:
+//				hj212_set_rs_en(*ptr->pdata);
+//				break;
 //			case PTCL_PARAM_INFO_SL651_RTU_ADDR:
 //				sl651_set_rtu_addr(ptr->pdata);
 //				break;
@@ -901,12 +901,12 @@ static void _ptcl_task_dtu_recv_handler(void *parg)
 								break;
 							}
 
-							if(RT_TRUE == hj212_data_decoder(report_data_ptr, recv_data_ptr, &param_info_ptr))
-							{
-								_ptcl_report_data_send(report_data_ptr, 0, recv_data_ptr->comm_type, recv_data_ptr->ch, 0, PTCL_EVENT_REPLY_ACK_IP, (rt_uint16_t *)0);
-								_ptcl_param_info_handler(&param_info_ptr, RT_TRUE);
-								break;
-							}
+//							if(RT_TRUE == hj212_data_decoder(report_data_ptr, recv_data_ptr, &param_info_ptr))
+//							{
+//								_ptcl_report_data_send(report_data_ptr, 0, recv_data_ptr->comm_type, recv_data_ptr->ch, 0, PTCL_EVENT_REPLY_ACK_IP, (rt_uint16_t *)0);
+//								_ptcl_param_info_handler(&param_info_ptr, RT_TRUE);
+//								break;
+//							}
 
 //							if(RT_TRUE == sl651_data_decoder(report_data_ptr, recv_data_ptr, &param_info_ptr))
 //							{
@@ -940,7 +940,7 @@ static void _ptcl_task_dtu_recv_handler(void *parg)
 					smtmng_param_restore();
 					sample_param_restore();
 					ads_param_restore();
-					hj212_param_restore();
+//					hj212_param_restore();
 //					sl651_param_restore();
 				}
 				else
@@ -1003,12 +1003,12 @@ static void _ptcl_task_tc_recv_handler(void *parg)
 						break;
 					}
 
-					if(RT_TRUE == hj212_data_decoder(report_data_ptr, recv_data_ptr, &param_info_ptr))
-					{
-						_ptcl_report_data_send(report_data_ptr, 0, PTCL_COMM_TYPE_TC, 0, 0, PTCL_EVENT_REPLY_ACK_TC, (rt_uint16_t *)0);
-						_ptcl_param_info_handler(&param_info_ptr, RT_TRUE);
-						break;
-					}
+//					if(RT_TRUE == hj212_data_decoder(report_data_ptr, recv_data_ptr, &param_info_ptr))
+//					{
+//						_ptcl_report_data_send(report_data_ptr, 0, PTCL_COMM_TYPE_TC, 0, 0, PTCL_EVENT_REPLY_ACK_TC, (rt_uint16_t *)0);
+//						_ptcl_param_info_handler(&param_info_ptr, RT_TRUE);
+//						break;
+//					}
 
 //					if(RT_TRUE == sl651_data_decoder(report_data_ptr, recv_data_ptr, &param_info_ptr))
 //					{
@@ -1036,7 +1036,7 @@ static void _ptcl_task_tc_recv_handler(void *parg)
 					smtmng_param_restore();
 					sample_param_restore();
 					ads_param_restore();
-					hj212_param_restore();
+//					hj212_param_restore();
 //					sl651_param_restore();
 				}
 				else
@@ -1166,7 +1166,7 @@ static void _ptcl_task_shell_recv_handler(void *parg)
 					smtmng_param_restore();
 					sample_param_restore();
 					ads_param_restore();
-					hj212_param_restore();
+//					hj212_param_restore();
 //					sl651_param_restore();
 				}
 				else
@@ -1264,7 +1264,7 @@ __exit_parg:
 					smtmng_param_restore();
 					sample_param_restore();
 					ads_param_restore();
-					hj212_param_restore();
+//					hj212_param_restore();
 //					sl651_param_restore();
 				}
 				else

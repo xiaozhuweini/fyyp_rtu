@@ -16,7 +16,7 @@
 #include "drv_ads.h"
 #include "drv_bluetooth.h"
 #include "drv_ds18b20.h"
-#include "hj212.h"
+//#include "hj212.h"
 
 
 
@@ -2619,6 +2619,7 @@ static rt_uint16_t _smtcfg_item_decoder(rt_uint8_t is_wr, rt_uint8_t *pdst, rt_u
 		DEBUG_INFO_OUTPUT_HEX(DEBUG_INFO_TYPE_FATFS, (psrc + i, src_len - i));
 		DEBUG_INFO_OUTPUT_HEX(DEBUG_INFO_TYPE_FATFS, ("汉字编码123", strlen("汉字编码123")));
 		break;
+#if 0
 	//hj212系统编码
 	case SMTCFG_AFN_SET_HJ212_ST:
 		if(HJ212_BYTES_ST != (src_len - i))
@@ -2866,6 +2867,7 @@ static rt_uint16_t _smtcfg_item_decoder(rt_uint8_t is_wr, rt_uint8_t *pdst, rt_u
 			return 0;
 		}
 		break;
+#endif
 	//参数集合信息
 	case SMTCFG_AFN_SET_PARAM_SET_ADS1110:
 		ads_param_restore();
