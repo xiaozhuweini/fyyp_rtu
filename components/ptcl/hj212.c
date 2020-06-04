@@ -8,6 +8,7 @@
 #include "equip.h"
 #include "sample.h"
 #include "drv_mempool.h"
+#include "fatfs.h"
 
 
 
@@ -1987,6 +1988,7 @@ __report_restart:
 
 			//存储数据区
 			sample_store_data_ex(&time, HJ212_CN_MIN_DATA, report_data_p->data_len - pos - strlen(HJ212_FRAME_CP_END) - HJ212_BYTES_FRAME_CRC - HJ212_BYTES_FRAME_BAOWEI, report_data_p->pdata + pos);
+			fatfs_write(HJ212_FILE_NAME_MIN_DATA, report_data_p->pdata, report_data_p->data_len);
 
 			//压入自报队列
 			if(RT_TRUE == ptcl_auto_report_post(report_data_p))
@@ -2082,6 +2084,7 @@ __report_hour_day:
 
 			//存储数据区
 			sample_store_data_ex(&time, HJ212_CN_HOUR_DATA, report_data_p->data_len - pos - strlen(HJ212_FRAME_CP_END) - HJ212_BYTES_FRAME_CRC - HJ212_BYTES_FRAME_BAOWEI, report_data_p->pdata + pos);
+			fatfs_write(HJ212_FILE_NAME_HOUR_DATA, report_data_p->pdata, report_data_p->data_len);
 
 			//压入自报队列
 			if(RT_TRUE == ptcl_auto_report_post(report_data_p))
@@ -2177,6 +2180,7 @@ __report_hour:
 
 			//存储数据区
 			sample_store_data_ex(&time, HJ212_CN_DAY_DATA, report_data_p->data_len - pos - strlen(HJ212_FRAME_CP_END) - HJ212_BYTES_FRAME_CRC - HJ212_BYTES_FRAME_BAOWEI, report_data_p->pdata + pos);
+			fatfs_write(HJ212_FILE_NAME_DAY_DATA, report_data_p->pdata, report_data_p->data_len);
 
 			//压入自报队列
 			if(RT_TRUE == ptcl_auto_report_post(report_data_p))
@@ -2262,6 +2266,7 @@ __report_day:
 
 			//存储数据区
 			sample_store_data_ex(&time, HJ212_CN_DAY_RS_DATA, report_data_p->data_len - pos - strlen(HJ212_FRAME_CP_END) - HJ212_BYTES_FRAME_CRC - HJ212_BYTES_FRAME_BAOWEI, report_data_p->pdata + pos);
+			fatfs_write(HJ212_FILE_NAME_DAY_RS_DATA, report_data_p->pdata, report_data_p->data_len);
 
 			//压入自报队列
 			if(RT_TRUE == ptcl_auto_report_post(report_data_p))
@@ -2637,12 +2642,13 @@ void hj212_time_cali_req(void)
 
 rt_uint8_t hj212_data_decoder(PTCL_REPORT_DATA *report_data_p, PTCL_RECV_DATA const *recv_data_p, PTCL_PARAM_INFO **param_info_pp)
 {
-	rt_uint16_t		i, data_len, crc_val, cn;
-	rt_uint8_t		rtn, qn_en = RT_FALSE, flag;
-	PTCL_PARAM_INFO	*param_info_p;
-	rt_mailbox_t	pmb;
-	rt_ubase_t		msg_pool;
-	rt_uint32_t		unix_low, unix_high;
+	rt_uint16_t			i, data_len, crc_val, cn;
+	rt_uint8_t			rtn, qn_en = RT_FALSE, flag;
+	PTCL_PARAM_INFO		*param_info_p;
+	rt_mailbox_t		pmb;
+	rt_ubase_t			msg_pool;
+	rt_uint32_t			unix_low, unix_high;
+	PTCL_REPORT_DATA	*pquery;
 
 	i = 0;
 	//包头
@@ -3242,6 +3248,24 @@ __cn_set_rtd_rs_dis:
 			rtn = HJ212_EXERTN_ERR_CMD;
 			goto __cn_get_old_data;
 		}
+		//换算至存储时间
+		if(HJ212_CN_MIN_DATA == cn)
+		{
+			crc_val		= hj212_get_min_interval();
+			crc_val		*= 60;
+			unix_high	+= crc_val;
+			unix_low	+= crc_val;
+		}
+		else if(HJ212_CN_HOUR_DATA == cn)
+		{
+			unix_high	+= 3600;
+			unix_low	+= 3600;
+		}
+		else
+		{
+			unix_high	+= 86400;
+			unix_low	+= 86400;
+		}
 		//申请并初始化接收邮箱
 		pmb = (rt_mailbox_t)mempool_req(sizeof(struct rt_mailbox), RT_WAITING_NO);
 		if((rt_mailbox_t)0 == pmb)
@@ -3276,27 +3300,36 @@ __cn_set_rtd_rs_dis:
 				break;
 			}
 
+			//申请上传数据空间
+			unix_low = *(rt_uint16_t *)param_info_p;
+			unix_low += 110;
+			pquery = ptcl_report_data_req(unix_low, RT_WAITING_NO);
+			if((PTCL_REPORT_DATA *)0 == pquery)
+			{
+				DEBUG_INFO_OUTPUT_STR(DEBUG_INFO_TYPE_HJ212, ("\r\n[hj212]历史包组包失败-申请空间"));
+				goto __next_old_data;
+			}
 			//包头
-			report_data_p->data_len = _hj212_frm_data_head(report_data_p->pdata, PTCL_BYTES_ACK_REPORT, (rt_uint8_t *)0, RT_TRUE, cn, HJ212_FLAG_PTCL_VER, 0, 0);
-			if(!report_data_p->data_len)
+			pquery->data_len = _hj212_frm_data_head(pquery->pdata, unix_low, (rt_uint8_t *)0, RT_TRUE, cn, HJ212_FLAG_PTCL_VER, 0, 0);
+			if(!pquery->data_len)
 			{
 				DEBUG_INFO_OUTPUT_STR(DEBUG_INFO_TYPE_HJ212, ("\r\n[hj212]历史包组包失败-包头"));
 				goto __next_old_data;
 			}
 			//数据区
 			crc_val = *(rt_uint16_t *)param_info_p;
-			if((report_data_p->data_len + crc_val) > PTCL_BYTES_ACK_REPORT)
+			if((pquery->data_len + crc_val) > unix_low)
 			{
 				DEBUG_INFO_OUTPUT_STR(DEBUG_INFO_TYPE_HJ212, ("\r\n[hj212]历史包组包失败-数据区[%d]", crc_val));
 				goto __next_old_data;
 			}
-			memcpy((void *)(report_data_p->pdata + report_data_p->data_len), (void *)((rt_uint8_t *)param_info_p + sizeof(rt_uint16_t)), crc_val);
-			report_data_p->data_len += crc_val;
+			memcpy((void *)(pquery->pdata + pquery->data_len), (void *)((rt_uint8_t *)param_info_p + sizeof(rt_uint16_t)), crc_val);
+			pquery->data_len += crc_val;
 			//CP_END
-			crc_val = _hj212_frm_cp_end(PTCL_BYTES_ACK_REPORT - report_data_p->data_len, report_data_p->pdata + report_data_p->data_len);
+			crc_val = _hj212_frm_cp_end(unix_low - pquery->data_len, pquery->pdata + pquery->data_len);
 			if(crc_val)
 			{
-				report_data_p->data_len += crc_val;
+				pquery->data_len += crc_val;
 			}
 			else
 			{
@@ -3304,18 +3337,18 @@ __cn_set_rtd_rs_dis:
 				goto __next_old_data;
 			}
 			//包尾处理
-			_hj212_frm_len(report_data_p->pdata, report_data_p->data_len);
-			crc_val = _hj212_crc_value(report_data_p->pdata + HJ212_BYTES_FRAME_BAOTOU + HJ212_BYTES_FRAME_LEN, report_data_p->data_len - HJ212_BYTES_FRAME_BAOTOU - HJ212_BYTES_FRAME_LEN);
-			crc_val = _hj212_frm_baowei(PTCL_BYTES_ACK_REPORT - report_data_p->data_len, report_data_p->pdata + report_data_p->data_len, crc_val);
+			_hj212_frm_len(pquery->pdata, pquery->data_len);
+			crc_val = _hj212_crc_value(pquery->pdata + HJ212_BYTES_FRAME_BAOTOU + HJ212_BYTES_FRAME_LEN, pquery->data_len - HJ212_BYTES_FRAME_BAOTOU - HJ212_BYTES_FRAME_LEN);
+			crc_val = _hj212_frm_baowei(unix_low - pquery->data_len, pquery->pdata + pquery->data_len, crc_val);
 			if(crc_val)
 			{
-				report_data_p->data_len += crc_val;
+				pquery->data_len += crc_val;
 
-				report_data_p->data_id			= 0;
-				report_data_p->fun_csq_update	= (void *)0;
-				report_data_p->need_reply		= RT_FALSE;
-				report_data_p->fcb_value		= 0;
-				report_data_p->ptcl_type		= PTCL_PTCL_TYPE_HJ212;
+				pquery->data_id			= 0;
+				pquery->fun_csq_update	= (void *)0;
+				pquery->need_reply		= RT_FALSE;
+				pquery->fcb_value		= 0;
+				pquery->ptcl_type		= PTCL_PTCL_TYPE_HJ212;
 			}
 			else
 			{
@@ -3324,15 +3357,18 @@ __cn_set_rtd_rs_dis:
 			}
 			//历史包内容
 			DEBUG_INFO_OUTPUT_STR(DEBUG_INFO_TYPE_HJ212, ("\r\n[hj212]历史包:"));
-			DEBUG_INFO_OUTPUT(DEBUG_INFO_TYPE_HJ212, (report_data_p->pdata, report_data_p->data_len));
+			DEBUG_INFO_OUTPUT(DEBUG_INFO_TYPE_HJ212, (pquery->pdata, pquery->data_len));
 			//发送历史包
-			ptcl_report_data_send(report_data_p, recv_data_p->comm_type, recv_data_p->ch, 0, 0, (rt_uint16_t *)0);
+			ptcl_report_data_send(pquery, recv_data_p->comm_type, recv_data_p->ch, 0, 0, (rt_uint16_t *)0);
 			
 __next_old_data:
+			if((PTCL_REPORT_DATA *)0 != pquery)
+			{
+				rt_mp_free((void *)pquery);
+			}
 			rt_mp_free((void *)param_info_p);
 		}
 		rt_mp_free((void *)pmb);
-		report_data_p->data_len = 0;
 		rtn = HJ212_EXERTN_OK;
 __cn_get_old_data:
 		break;

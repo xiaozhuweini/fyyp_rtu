@@ -56,6 +56,10 @@
 #define HJ212_BYTES_DATA_RTD			230
 #define HJ212_BYTES_DATA_MIN			460
 #define HJ212_REPORT_REPLY_EN			RT_FALSE
+#define HJ212_FILE_NAME_MIN_DATA		"min.txt"
+#define HJ212_FILE_NAME_HOUR_DATA		"hour.txt"
+#define HJ212_FILE_NAME_DAY_DATA		"day.txt"
+#define HJ212_FILE_NAME_DAY_RS_DATA		"day_rs.txt"
 
 //×Ö¶ÎÃû
 #define HJ212_FIELD_NAME_SYSTIME		"SystemTime="

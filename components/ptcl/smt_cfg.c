@@ -2350,6 +2350,32 @@ static rt_uint16_t _smtcfg_item_decoder(rt_uint8_t is_wr, rt_uint8_t *pdst, rt_u
 			return 0;
 		}
 		break;
+	//ads转换值
+	case SMTCFG_AFN_GET_AD_VAL_0:
+	case SMTCFG_AFN_GET_AD_VAL_1:
+	case SMTCFG_AFN_GET_AD_VAL_2:
+	case SMTCFG_AFN_GET_AD_VAL_3:
+	case SMTCFG_AFN_GET_AD_VAL_4:
+	case SMTCFG_AFN_GET_AD_VAL_5:
+	case SMTCFG_AFN_GET_AD_VAL_6:
+	case SMTCFG_AFN_GET_AD_VAL_7:
+		if(RT_TRUE == ads_conv_value(grp - SMTCFG_AFN_GET_AD_VAL_0, &pos))
+		{
+			len = snprintf((char *)(pdst + dst_len), max_len - dst_len, ",%d", pos);
+		}
+		else
+		{
+			len = snprintf((char *)(pdst + dst_len), max_len - dst_len, ",无效值");
+		}
+		if((dst_len + len) < max_len)
+		{
+			dst_len += len;
+		}
+		else
+		{
+			return 0;
+		}
+		break;
 	//蓝牙模块名称
 	case SMTCFG_AFN_SET_BT_MODULE_NAME:
 		if(RT_FALSE == bt_set_module_name(psrc + i, src_len - i))

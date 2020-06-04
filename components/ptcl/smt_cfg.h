@@ -527,6 +527,14 @@
 #define SMTCFG_AFN_GET_AD_CAL_VAL_6				(SMTCFG_TAG_READ	+ (13	<< 8) + 6)
 #define SMTCFG_AFN_SET_AD_CAL_VAL_7				(SMTCFG_TAG_WRITE	+ (13	<< 8) + 7)
 #define SMTCFG_AFN_GET_AD_CAL_VAL_7				(SMTCFG_TAG_READ	+ (13	<< 8) + 7)
+#define SMTCFG_AFN_GET_AD_VAL_0					(SMTCFG_TAG_READ	+ (13	<< 8) + 8)
+#define SMTCFG_AFN_GET_AD_VAL_1					(SMTCFG_TAG_READ	+ (13	<< 8) + 9)
+#define SMTCFG_AFN_GET_AD_VAL_2					(SMTCFG_TAG_READ	+ (13	<< 8) + 10)
+#define SMTCFG_AFN_GET_AD_VAL_3					(SMTCFG_TAG_READ	+ (13	<< 8) + 11)
+#define SMTCFG_AFN_GET_AD_VAL_4					(SMTCFG_TAG_READ	+ (13	<< 8) + 12)
+#define SMTCFG_AFN_GET_AD_VAL_5					(SMTCFG_TAG_READ	+ (13	<< 8) + 13)
+#define SMTCFG_AFN_GET_AD_VAL_6					(SMTCFG_TAG_READ	+ (13	<< 8) + 14)
+#define SMTCFG_AFN_GET_AD_VAL_7					(SMTCFG_TAG_READ	+ (13	<< 8) + 15)
 
 //page15:实时数据
 #define SMTCFG_AFN_GET_SAMPLE_WUSHUI			(SMTCFG_TAG_READ	+ (15	<< 8) + 0)
