@@ -2338,6 +2338,9 @@
       <name>$PROJ_DIR$\drivers\drv_fyyp.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\drivers\drv_iic.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\drivers\drv_lpm.c</name>
     </file>
     <file>
@@ -2345,6 +2348,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\drivers\drv_pin.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\drivers\drv_rtcee.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\drivers\drv_tevent.c</name>
     </file>
   </group>
   <group>

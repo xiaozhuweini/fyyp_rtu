@@ -15,6 +15,8 @@ FLASH			¹Ì¼þ			(0--1048575)1MB
 
 #include "rtthread.h"
 #include "drv_lpm.h"
+#include "drv_rtcee.h"
+#include "drv_tevent.h"
 
 
 
@@ -25,7 +27,6 @@ int main(void)
 	lpm_cpu_ref(RT_FALSE);
 	while(1)
 	{
-#if 0
 		rtcee_rtc_sec_pend();
 
 		if(++tick_sec >= 3600)
@@ -44,13 +45,6 @@ int main(void)
 		if(2 == tick_sec)
 		{
 			tevent_post(TEVENT_EVENT_HOUR);
-		}
-#endif
-		rt_thread_delay(RT_TICK_PER_SECOND);
-
-		if(++tick_sec >= 3600)
-		{
-			tick_sec = 0;
 		}
 	}
 }
